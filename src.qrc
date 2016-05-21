@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/images" lang="Russian">
+        <file>defaultAvatar.jpg</file>
+        <file>uploads/images/vadim.jpg</file>
+        <file>uploads/images/yarik.jpg</file>
+    </qresource>
+    <qresource prefix="/images/for_menu_bar" lang="Russian">
+        <file>src/images/undoActionIcon.ico</file>
+        <file>src/images/redoActionIcon.ico</file>
+    </qresource>
+</RCC>
