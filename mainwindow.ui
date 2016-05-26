@@ -57,7 +57,7 @@
         <item>
          <widget class="QTreeView" name="nutrition_TableOfPlannedResults">
           <attribute name="headerVisible">
-           <bool>true</bool>
+           <bool>false</bool>
           </attribute>
          </widget>
         </item>
@@ -96,7 +96,7 @@
            </font>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string>Запланировано</string>
           </property>
           <property name="textFormat">
            <enum>Qt::AutoText</enum>
@@ -121,7 +121,7 @@
            </font>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string>Фактически</string>
           </property>
           <property name="textFormat">
            <enum>Qt::AutoText</enum>
@@ -238,7 +238,7 @@
   </action>
   <action name="menuAction_changeActualUser">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Сменить текущего пользователя...</string>

@@ -52,7 +52,7 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return 0;
 
-    return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+    return QAbstractItemModel::flags(index);
 }
 
 TreeItem *TreeModel::getItem(const QModelIndex &index) const

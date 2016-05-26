@@ -22,7 +22,12 @@ SOURCES += main.cpp\
     user.cpp \
     treemodel.cpp \
     treeitem.cpp \
-    states.cpp
+    states.cpp \
+    tablerecordeditwidget.cpp \
+    addnewuserwidget.cpp \
+    imagemodel.cpp \
+    mysqlexecutor.cpp \
+    filemanager.cpp
 
 HEADERS  += mainwindow.h \
     userselectiondialogwindow.h \
@@ -30,10 +35,16 @@ HEADERS  += mainwindow.h \
     user.h \
     treemodel.h \
     treeitem.h \
-    states.h
+    states.h \
+    tablerecordeditwidget.h \
+    addnewuserwidget.h \
+    imagemodel.h \
+    mysqlexecutor.h \
+    filemanager.h
 
 FORMS    += mainwindow.ui \
-    userselectiondialogwindow.ui
+    userselectiondialogwindow.ui \
+    addnewuserwidget.ui
 
 RESOURCES += \
     src.qrc

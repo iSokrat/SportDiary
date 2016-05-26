@@ -3,24 +3,26 @@
 User::User(const qint32 id,
            const QString &name,
            const QString &surname,
-           const QString &pathToAvatar):
+           const QString &pathToAvatar, const QDateTime &birthDate):
     id(id),
     name(name),
     surname(surname),
-    pathToAvatar(pathToAvatar){}
+    pathToAvatar(pathToAvatar),
+    birthDate(birthDate){}
 
 
 /*
  * Меняет пользователя на нового user
 */
-User& User::operator=(const User &user)
-{
+User& User::operator=(const User &user){
+
     if (&user == this)
         return *this;
     id = user.id;
     name = user.name;
     surname = user.surname,
     pathToAvatar = user.pathToAvatar;
+    birthDate = user.birthDate;
     return *this;
 }
 
@@ -32,5 +34,6 @@ User& User::operator=(const User&& user){
     name = std::move(user.name);
     surname = std::move(user.surname);
     pathToAvatar = std::move(user.pathToAvatar);
+    birthDate = user.birthDate;
     return *this;
 }

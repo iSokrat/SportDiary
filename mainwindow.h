@@ -25,55 +25,47 @@ public:
 
 private slots:
     void on_menuAction_changeActualUser_triggered();
-    void updateAutorizedUser(QVariant infoAboutUser);
+    void updateAutorizedUser(const User &user);
 
     void setInfoFromDBOnDateForTableOfPlannedResults(const QDate &date, const QString &keyField);
     void changeInfoForTableOfPlannedResults(const QDate& date);
-    void on_applyChangesAction_triggered();
+
+    void showWindowForEditTheRecord(const QModelIndex& index);
+    void updateRowForPlannedResultModel(const QModelIndex&index,
+                           const QList<QVariant>&data) noexcept;
+    void on_menuAction_addNewUser_triggered();
 
 private:
-    void initActualUserFromDB();
+    void setupConnection();
 
     void updateUserInfoPanel(User & user);
     void updateWindow();
 
-    QString getTextQueryForPlannedResult(const User &autorizedUser,const QVariant& date) const;
+    QStringList getFieldForTextQueryForPlannedResult() const;
     QStringList getHeadersForPlannedResult();
+
 private:
     Ui::MainWindow *ui;
     User autorizedUser{};
     UserInfoWidget userInfoPanel{};
     TreeModel* sqlQueryModelForPlannedResult = nullptr;
-    States programState{};
+
+    //QQueue <QString> deferredSqlExpression;
 };
 
 // Возвращает запрос для таблицы запланированных результатов
-inline QString MainWindow::getTextQueryForPlannedResult(const User& autorizedUser,const QVariant& date) const{
-
-    // Если переданный тип не может быть конвертирован в QDate
-    // То возвращаем пустой запрос
-    if (!date.canConvert<QDate>())
-        return QString{};
-
-    //  Данный текст для запроса выбирает информацию
-    // о питании для авторизированного пользователя
-    // на определенную дату
-    QString textQueryForPlannedResult = "SELECT "
-                                        "       eating.date"
-                                        "      ,products.name"
-                                        "      ,products.protein"
-                                        "      ,products.fat"
-                                        "      ,products.carbohydrates"
-                                        "      ,eating.weight_food "
-                                        "FROM   nutrition_product as products,"
-                                        "       eating "
-                                        "WHERE  eating.id_user = "+QString::number(autorizedUser.getId())+
-                                        "   AND eating.id_product = products.id_product "
-                                        "   AND CONVERT(eating.date,DATE) = '"+date.toDate().toString("yyyy-MM-dd")+"'"
-                                        " ORDER BY DATE";
-
-    return textQueryForPlannedResult;
+inline QStringList MainWindow::getFieldForTextQueryForPlannedResult() const{
+    return QStringList{
+        "eating.date",
+        "products.name",
+        "products.protein",
+        "products.fat",
+        "products.carbohydrates"
+        "eating.weight_food ",
+        "eating.id_eating ",
+    };
 }
+
 
 inline QStringList MainWindow::getHeadersForPlannedResult(){
     QStringList headerLabels;
@@ -81,7 +73,8 @@ inline QStringList MainWindow::getHeadersForPlannedResult(){
                  << "Белки, граммы"
                  << "Жиры, граммы"
                  << "Углеводы, граммы"
-                 << "Вес, граммы";
+                 << "Вес, граммы"
+                 << "id_eating";
     return headerLabels;
 }
 

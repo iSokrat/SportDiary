@@ -4,23 +4,32 @@
 #include "userselectiondialogwindow.h"
 #include "userinfowidget.h"
 #include "treemodel.h"
+#include "tablerecordeditwidget.h"
+#include "addnewuserwidget.h"
+#include "mysqlexecutor.h"
+
 /*-------------------------------------------------------*/
 #include <QtSql>
 #include <QSharedPointer>
 #include <QVBoxLayout>
 #include <QSplitter>
-
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+    ui(new Ui::MainWindow){
+
     ui->setupUi(this);
-    initActualUserFromDB();
+
+    // Инициализируем авторизированного
+    // пользователя по id из Db
+    const auto idAutorizedUser = 1;
+    MySqlExecutor::initUser(idAutorizedUser,autorizedUser);
+
     updateUserInfoPanel(autorizedUser);
 
     // Создаем компоновщик для userInfoWidget и ui->TabsOfSportFields
-    QVBoxLayout* centralLayout = new QVBoxLayout(this);
+    QVBoxLayout* centralLayout = new QVBoxLayout;
     centralLayout->addWidget(&userInfoPanel);
     centralLayout->addWidget(ui->TabsOfSportFields);
 
@@ -29,12 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Загружаем информацию из БД в таблицу запланированных результатов
     // на определенную дату, ключевое поле - date
-    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),getKeyFieldForPlannedResult());
-
-    connect(ui->Calendar,
-            SIGNAL(activated(QDate)),
-            this,
-            SLOT(changeInfoForTableOfPlannedResults(QDate)));
+    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),
+                                                getKeyFieldForPlannedResult());
+    // Настраиваем все вызовы connect
+    setupConnection();
 }
 
 MainWindow::~MainWindow(){
@@ -45,7 +52,10 @@ void MainWindow::on_menuAction_changeActualUser_triggered()
 {
 
    QSharedPointer <UserSelectionDialogWindow> userSelectionWindow(UserSelectionDialogWindow::createUserSelectionDialogWindow(this));
-   connect(userSelectionWindow.data(),SIGNAL(userChanged(QVariant)),this,SLOT(updateAutorizedUser(QVariant)));
+   connect(userSelectionWindow.data(),
+           SIGNAL(userChanged(User)),
+           this,
+           SLOT(updateAutorizedUser(User)));
    userSelectionWindow.data()->exec();
 }
 
@@ -53,29 +63,13 @@ void MainWindow::on_menuAction_changeActualUser_triggered()
  * на основе информации, которая передана с помощью
  * infoAboutUser
 */
-void MainWindow::updateAutorizedUser(QVariant infoAboutUser)
-{
-    // Парсим json формат
-    QJsonObject info = infoAboutUser.toJsonObject();
-
-    // Создаем переменные для хранения названия полей БД
-    QString fieldId = "id_user";
-    QString fieldName = "name";
-    QString fieldSurname = "surname";
-    QString fieldPathToAvatar = "path_to_avatar";
-
-
-    autorizedUser = User(info[fieldId].toInt(),
-                         info[fieldName].toString(),
-                         info[fieldSurname].toString(),
-                         info[fieldPathToAvatar].toString());
+void MainWindow::updateAutorizedUser(const User& user){
+    autorizedUser = user;
     updateWindow();
 }
 
 void MainWindow::setInfoFromDBOnDateForTableOfPlannedResults(const QDate &date,
                                                              const QString &keyField){
-    // Составляем текст запроса
-    QString textQueryForPlannedResult = std::move(getTextQueryForPlannedResult(autorizedUser,date));
 
     // Составляем текст для загловка таблицы
     QStringList headerLabels = std::move(getHeadersForPlannedResult());
@@ -87,12 +81,15 @@ void MainWindow::setInfoFromDBOnDateForTableOfPlannedResults(const QDate &date,
 
     // Создаем модель
     sqlQueryModelForPlannedResult = new TreeModel(headerLabels,
-                                                  textQueryForPlannedResult,
+                                                  std::move(MySqlExecutor::getTextQueryForPlannedResult(autorizedUser,date)),
                                                   keyField,
                                                   ui->nutrition_TableOfPlannedResults);
 
     // Установить созданную древовидную модель
     ui->nutrition_TableOfPlannedResults->setModel(sqlQueryModelForPlannedResult);
+
+    // Скрытие заголовка - отключить
+    ui->nutrition_TableOfPlannedResults->setHeaderHidden(false);
 
     // Выровнять столбцы по контенту
     for (auto column = 0; column < sqlQueryModelForPlannedResult->columnCount(); ++column)
@@ -104,11 +101,52 @@ void MainWindow::changeInfoForTableOfPlannedResults(const QDate &date){
     setInfoFromDBOnDateForTableOfPlannedResults(date,getKeyFieldForPlannedResult());
 }
 
+/*
+ * Отображение окна редактирования записи
+*/
+void MainWindow::showWindowForEditTheRecord(const QModelIndex &index){
+
+    TableRecordEditWidget* window = new TableRecordEditWidget(index,this);
+    connect(window,
+            SIGNAL(acceptData(QModelIndex,QList<QVariant>)),
+            this,
+            SLOT(updateRowForPlannedResultModel(QModelIndex,QList<QVariant>)));
+    // Окно становиться главным,
+    // пока его не закроют
+    window->exec();
+
+}
+
+/* Обновление информации на основании data. Index
+ * должен хранить строку модели, которую необходимо
+ * обновить
+*/
+void MainWindow::updateRowForPlannedResultModel(const QModelIndex & index,
+                                                const QList<QVariant> & data) noexcept{
+
+    if (!index.isValid()){
+        qDebug() <<"Ошибка в updateRowForPlannedResultModel:"<<index;
+        return;
+    }
+
+    // Устанавливаем информацию для каждого столбца из data в
+    // sqlQueryModelForPlannedResult на основе index.row()
+    // и index.parent()
+    for (auto column = 0;column< sqlQueryModelForPlannedResult->columnCount();column++){
+        QModelIndex dataCell = std::move( sqlQueryModelForPlannedResult->index(index.row(),
+                                                                               column,index.parent()) );
+        sqlQueryModelForPlannedResult->setData(dataCell,data[column],Qt::EditRole);
+    }
+
+}
+
 /*  Полностью обновляет окно, используя свои поля
 */
-void MainWindow::updateWindow()
-{
+void MainWindow::updateWindow(){
     updateUserInfoPanel(autorizedUser);
+    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),
+                                                getKeyFieldForPlannedResult());
+    ui->Calendar->setSelectedDate(QDate::currentDate());
 }
 
 /*
@@ -123,37 +161,48 @@ void MainWindow::updateUserInfoPanel(User &user)
     userInfoPanel.setImage(user.getPathToAvatar());
 }
 
-/*  Извлекает информацию из хранилища о пользователе
- * (из БД),
- * который последный раз
- * авторизировался в системе
+/* Настройка connect связей
 */
-void MainWindow::initActualUserFromDB()
-{
-    // Делаем текст запроса к авторизованному пользователю
-    const auto idUser = 1;
+void MainWindow::setupConnection(){
+    connect(ui->Calendar,
+            SIGNAL(activated(QDate)),
+            this,
+            SLOT(changeInfoForTableOfPlannedResults(QDate)));
 
-    QString fieldId = "id_user",
-            fieldName = "name",
-            fieldSurname = "surname",
-            fieldPathToAvatar = "path_to_avatar";
-
-    QString queryText = "SELECT * "
-                        "FROM user "
-                        "WHERE "+fieldId+" ="+QString::number(idUser);
-
-    // Совершаем запрос на основе текста запроса
-    QSqlQuery queryToAutorizedUser{queryText};
-    queryToAutorizedUser.exec();
-    queryToAutorizedUser.next();
-
-    // Инициализируем авторизированного пользователя
-    autorizedUser.setId(idUser);
-    autorizedUser.setName(queryToAutorizedUser.record().value(fieldName).toString());
-    autorizedUser.setSurname(queryToAutorizedUser.record().value(fieldSurname).toString());
-    autorizedUser.setPathToAvatar(queryToAutorizedUser.record().value(fieldPathToAvatar).toString());
+    // При клике по строке таблицы открыть окно редактирования
+    connect(ui->nutrition_TableOfPlannedResults,
+            SIGNAL(doubleClicked(QModelIndex)),
+            this,
+            SLOT(showWindowForEditTheRecord(QModelIndex)));
 }
 
-void MainWindow::on_applyChangesAction_triggered(){
+/* Открыть окно "Добавить нового пользователя"
+*/
+void MainWindow::on_menuAction_addNewUser_triggered(){
+    AddNewUserWidget* window = new AddNewUserWidget;
+
+    window->exec();
+
+
+    // После exec добавляем нового пользователя в БД пользователя
+    User newUser = window->getNewUser() ;
+    bool isAdded = MySqlExecutor::addNewUserIntoDB(newUser);
+
+    // Скачиваем файл в рабочую директорию
+    QFile::save(newUser.getPathToAvatar(),'/uploads/images/avatar');
+
+    if (isAdded)
+        QMessageBox::information(this,
+                                 tr("Операция выполнена:)"),
+                                 tr("Новый пользователь добавлен!"),
+                                 QMessageBox::Ok);
+    else
+        QMessageBox::critical(this,
+                              tr("Операция не выполнена:("),
+                              tr("Пользователь не может быть добавлен, "
+                                 "обратитесь к разработчику, чтобы "
+                                 "он устранил ошибку. "),
+                              QMessageBox::Ok);
+    delete window;
 
 }

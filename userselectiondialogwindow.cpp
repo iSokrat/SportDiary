@@ -17,14 +17,20 @@ UserSelectionDialogWindow::UserSelectionDialogWindow(QWidget *parent) :
     QString fieldName = "name";
     QString fieldSurname = "surname";
     QString fieldPathToAvatar = "path_to_avatar";
+    QString fieldBirthDate = "birthdate";
 
     // Создаем запрос для выборки всех пользователей
     //Сам текст запроса
-    QString textQuery(" SELECT "+fieldId+","+fieldName+","+fieldSurname+","+fieldPathToAvatar+
+    QString textQuery(" SELECT "+fieldId+","+fieldName+","+fieldSurname+","+fieldPathToAvatar+","+fieldBirthDate+
                       " FROM user"
                       " ORDER BY "+fieldSurname);
+
     QSqlQuery usersQuery(textQuery);
-    usersQuery.exec();
+
+    if (!usersQuery.exec()){
+        qDebug() <<usersQuery.lastError();
+        return;
+    }
 
     // Заполняем спиок пользователей информацией из базы данных
     while (usersQuery.next()){
@@ -36,14 +42,14 @@ UserSelectionDialogWindow::UserSelectionDialogWindow(QWidget *parent) :
         auto userName = usersQuery.record().value(fieldName).toString(),
              userSurname = usersQuery.record().value(fieldSurname).toString(),
              userPathToAvatar = usersQuery.record().value(fieldPathToAvatar).toString();
-
+        auto userBirthDate = usersQuery.record().value(fieldBirthDate).toString();
         // Записываем эту информацию в объект JSON
         QJsonObject userInfo;
         userInfo.insert(fieldId,QJsonValue(userId));
         userInfo.insert(fieldName,QJsonValue(userName));
         userInfo.insert(fieldSurname,QJsonValue(userSurname));
         userInfo.insert(fieldPathToAvatar,QJsonValue(userPathToAvatar));
-
+        userInfo.insert(fieldBirthDate,QJsonValue(userBirthDate));
 
         // Заполняем поля виджета информацией из БД
         userInfoWidget->setName(userName);
@@ -82,7 +88,7 @@ UserSelectionDialogWindow *UserSelectionDialogWindow::createUserSelectionDialogW
 void UserSelectionDialogWindow::userIsSelected(QModelIndex index)
 {
 
-    emit userChanged(index.data());
+    emit userChanged( convertJsonInfoToUserInfo( index.data().toJsonObject() ) );
     close();
 }
 
@@ -162,4 +168,21 @@ void UserSelectionDialogWindow::setInfoForFoundUsers(const QString& searchInfo)
         item->setSizeHint(userInfoWidget->sizeHint());
         ui->listOfUsersView->setItemWidget(item,userInfoWidget);
     }
+}
+
+User UserSelectionDialogWindow::convertJsonInfoToUserInfo(const QJsonObject &info) const{
+
+    // Создаем переменные для хранения названия полей БД
+    QString fieldId = "id_user";
+    QString fieldName = "name";
+    QString fieldSurname = "surname";
+    QString fieldPathToAvatar = "path_to_avatar";
+    QString fieldBirthDate = "birthdate";
+
+    return  User(info[fieldId].toInt(),
+                 info[fieldName].toString(),
+                 info[fieldSurname].toString(),
+                 info[fieldPathToAvatar].toString(),
+                 QDateTime::fromString( info[fieldBirthDate].toString(), Qt::ISODate)
+                 );
 }
