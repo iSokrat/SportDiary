@@ -16,15 +16,36 @@ FileManager::FileManager(){
  * возвращает путь к скачанному файлу
 */
 QString FileManager::uploadAvatarForUser(const User &user){
+    // Получаем имя для нового пользователя
+    QString newFileName = std::move(getHashFileName(user));
+
+    // Определяем информацию о файле
+    QFileInfo clientPathToAvatarInfo(user.getPathToAvatar());
+
     // Формируем путь для сохранения файла
-    auto newLocation = PathsOfFiles::uploadsDirForAvatar;
+    auto newLocation =  QDir::currentPath()+
+                        PathsOfFiles::uploadsDirForAvatar+
+                        QDir::separator()+
+                        newFileName+'.'+
+                        clientPathToAvatarInfo.suffix();
 
-
-    if (!QFile::copy( user.getPathToAvatar(),newLocation.currentPath() )){
+    qDebug() <<newLocation;
+    if (!QFile::copy( user.getPathToAvatar(),newLocation)){
         qDebug() <<" В uploadAvatarForUser: файл не скачен!";
         return QString();
     }
     else
-        return newLocation.currentPath();
+        return newLocation;
+}
+
+/*
+ * Формирование уникального имени для пользователя
+ *  user
+*/
+QString FileManager::getHashFileName(const User &user){
+    QString hashName = QString::number(user.getName())+
+                        '_'+
+                        QDateTime::currentDateTime().toString();
+    return std::move(hashName);
 }
 

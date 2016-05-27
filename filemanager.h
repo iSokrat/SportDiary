@@ -10,6 +10,8 @@ public:
     FileManager();
 
     static QString uploadAvatarForUser(const User& user);
+private:
+    static QString getHashFileName(const User& user);
 };
 
 #endif // FILEMANAGER_H

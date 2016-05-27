@@ -7,10 +7,10 @@ namespace{
 
 struct PathsOfFiles{
 public:
-    static const QDir uploadsDirForAvatar;
+    static const QString uploadsDirForAvatar;
 };
 
-const QDir PathsOfFiles::uploadsDirForAvatar = QDir("/uploads/images/avatars");
+const QString PathsOfFiles::uploadsDirForAvatar = QString("/uploads/images/avatars");
 
 }
 #endif // PATHSOFFILES_H
