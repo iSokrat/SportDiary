@@ -184,7 +184,7 @@ void MainWindow::on_menuAction_addNewUser_triggered(){
     window->exec();
 
 
-    // После exec добавляем нового пользователя в БД пользователя
+    // После exec получаем введенную информацию
     User newUser = window->getNewUser() ;
 
     // Скачиваем аватар в рабочую папку для пользователя

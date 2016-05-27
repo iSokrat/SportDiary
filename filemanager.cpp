@@ -29,23 +29,23 @@ QString FileManager::uploadAvatarForUser(const User &user){
                         newFileName+'.'+
                         clientPathToAvatarInfo.suffix();
 
-    qDebug() <<newLocation;
+    // Если файл не скопировался
     if (!QFile::copy( user.getPathToAvatar(),newLocation)){
         qDebug() <<" В uploadAvatarForUser: файл не скачен!";
         return QString();
     }
-    else
+    else // Если файл скопирован успешно
         return newLocation;
 }
 
 /*
- * Формирование уникального имени для пользователя
+ *  Формирование уникального имени для пользователя
  *  user
 */
 QString FileManager::getHashFileName(const User &user){
-    QString hashName = QString::number(user.getName())+
+    QString hashName =  user.getName()+
                         '_'+
-                        QDateTime::currentDateTime().toString();
+                        QDateTime::currentDateTime().toString(Qt::ISODate);
     return std::move(hashName);
 }
 
