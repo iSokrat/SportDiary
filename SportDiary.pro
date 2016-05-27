@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     addnewuserwidget.cpp \
     imagemodel.cpp \
     mysqlexecutor.cpp \
-    filemanager.cpp
+    filemanager.cpp \
+    pathsoffiles.cpp
 
 HEADERS  += mainwindow.h \
     userselectiondialogwindow.h \
@@ -40,7 +41,8 @@ HEADERS  += mainwindow.h \
     addnewuserwidget.h \
     imagemodel.h \
     mysqlexecutor.h \
-    filemanager.h
+    filemanager.h \
+    pathsoffiles.h
 
 FORMS    += mainwindow.ui \
     userselectiondialogwindow.ui \

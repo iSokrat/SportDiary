@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     MainWindow w;
-    w.showMaximized();
+    w.showNormal();
 
     //UserInfoWidget u;
     //u.show();

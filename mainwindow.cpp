@@ -7,7 +7,7 @@
 #include "tablerecordeditwidget.h"
 #include "addnewuserwidget.h"
 #include "mysqlexecutor.h"
-
+#include "filemanager.h"
 /*-------------------------------------------------------*/
 #include <QtSql>
 #include <QSharedPointer>
@@ -186,10 +186,25 @@ void MainWindow::on_menuAction_addNewUser_triggered(){
 
     // После exec добавляем нового пользователя в БД пользователя
     User newUser = window->getNewUser() ;
+
+    // Скачиваем аватар в рабочую папку для пользователя
+    QString pathToUpladFile = FileManager::uploadAvatarForUser(newUser);
+
+    // Если файл был не скачен
+    if (pathToUpladFile.isEmpty()){
+        qDebug() <<" В on_menuAction_addNewUser_triggered():"
+                   " файл не был скачен - FileManager::uploadAvatarForUser()"
+                   " ничего не вернул (пустой путь).";
+        return;
+    }
+
+    // Устанавливаем новый путь к аватарке
+    newUser.setPathToAvatar(pathToUpladFile);
+
+    // Добавляем
     bool isAdded = MySqlExecutor::addNewUserIntoDB(newUser);
 
-    // Скачиваем файл в рабочую директорию
-    QFile::save(newUser.getPathToAvatar(),'/uploads/images/avatar');
+
 
     if (isAdded)
         QMessageBox::information(this,
