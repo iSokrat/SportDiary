@@ -174,6 +174,8 @@ void MainWindow::setupConnection(){
             SIGNAL(doubleClicked(QModelIndex)),
             this,
             SLOT(showWindowForEditTheRecord(QModelIndex)));
+
+    connect(ui->nutrition_TableOfPlannedResults)
 }
 
 /* Открыть окно "Добавить нового пользователя"
