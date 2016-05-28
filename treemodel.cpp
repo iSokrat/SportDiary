@@ -4,7 +4,7 @@
 #include <QDebug>
 TreeModel::TreeModel(const QStringList &headers,
                      const QString &textForQuery,
-                     const QString& nameOfKeyField,
+                     const QStringList& namesOfKeyFields,
                      QObject *parent)
     :QAbstractItemModel(parent){
 
@@ -13,7 +13,7 @@ TreeModel::TreeModel(const QStringList &headers,
         rootData << header;
 
     rootItem = new TreeItem(rootData);
-    setKeyField(nameOfKeyField);
+    setKeyFields(namesOfKeyFields);
     setupModelData(textForQuery,rootItem);
 }
 
@@ -214,11 +214,11 @@ void TreeModel::setupModelData(const QString &textForQuery, TreeItem *parent)
         return;
     }
 
-    auto keyField=getKeyField();
+    auto keyFields=getKeyFields();
 
-    // Если ключевое слово не задано, то берем первое поле
-    if (keyField.isEmpty())
-        keyField = query.record().fieldName(0);
+    // Если ключевые слова не заданы, то берем первое поле
+    if (keyFields.isEmpty())
+        keyFields.append(query.record().fieldName(0));
 
     // Пока есть записи, полученные при запросе
     while (query.next()){
@@ -226,44 +226,66 @@ void TreeModel::setupModelData(const QString &textForQuery, TreeItem *parent)
         // Вставляем один новый узел на последнюю позицию с количеством
         // столбцов, равным количеству заголовочных столбцов у parent
         bool statusOfInsertion = parent->insertChildren(parent->childCount(),1,parent->columnCount());
+
         // Если вставка прошла с ошибкой, то переходим
         // к следующей записи
         if (!statusOfInsertion)
             continue;
 
         // Получаем вставленный узел (ребенка parent)
-        auto* dropDownNode = parent->child(parent->childCount()-1);
+        auto* currentDropDownNode = parent->child(parent->childCount()-1);
 
-        // Полученный узел является раскрывающимя списком,
-        // устанавливаем для него текст в первом поле
-        QVariant data = query.value(keyField);
-        dropDownNode->setData(0,data);
+        // Перебераем все ключевые поля и создаем списки
+        // такой вложенности, которая соответствует
+        // числу ключевых полей
+        for (const auto& keyField:keyFields){
 
-        // Создаем внутреннее наполнение списка
-        do{
-            // Если значение по ключевовому полю не совпадает с предыдущими значениями
-            if (query.value(keyField)!=data){
-                // Делаем шаг назад для того, чтобы не пропустить запись случайно
-                // из-за этого цикла
-                query.previous();
-                break;
-            }
-
-            // Вставляем элемент в раскрывающийся список
-            dropDownNode->insertChildren(dropDownNode->childCount(),1,parent->columnCount());
-            // Получаем его
-            auto* childOfDropDownNode = dropDownNode->child(dropDownNode->childCount()-1);
-
-            // Вставляем значения в элемент, исключая поле, имя которого
-            // совпадает с ключевым полем ( его значение и так уже выведено
-            // в заголовке раскрывающегося списка )
-            auto dataIndex=0;
-            for (auto fieldPos = 0; fieldPos< query.record().count();fieldPos++)
-                if (query.record().fieldName(fieldPos)!=keyField)
-                    childOfDropDownNode->setData(dataIndex++,query.value(fieldPos));
-
-        }while(query.next());
+            // Заполняем раскрывающийся список
+            fillDropDown(currentDropDownNode,query,keyField,parent->columnCount());
+        }
     }
+}
+
+/*
+ * Заполняем список dropDown данными из запроса query.
+ * KeyField необходим для того, чтобы определить, сколько
+ * записей из query необходимо разместить в dropDown.
+*/
+void TreeModel::fillDropDown(TreeItem* dropDown,
+                             QSqlQuery& query,
+                             const QString& keyField,
+                             qint32 columnCount){
+
+    // Полученный узел является раскрывающимя списком,
+    // устанавливаем для него текст в первом поле
+    QVariant data = query.value(keyField);
+    dropDown->setData(0,data);
+
+    // Создаем внутреннее наполнение списка
+    do{
+        // Если значение текущей записи для
+        // keyField не совпадает с предыдущим значением
+        if (query.value(keyField)!=data){
+            // Делаем шаг назад для того, чтобы не пропустить запись случайно
+            // из-за этого цикла
+            query.previous();
+            break;
+        }
+
+        // Вставляем элемент в раскрывающийся список
+        dropDown->insertChildren(dropDown->childCount(),1,columnCount);
+        // Получаем его
+        auto* childOfDropDownNode = dropDown->child(dropDown->childCount()-1);
+
+        // Вставляем значения в элемент, исключая поле, имя которого
+        // совпадает с ключевым полем ( его значение и так уже выведено
+        // в заголовке раскрывающегося списка )
+        auto dataIndex=0;
+        for (auto fieldPos = 0; fieldPos< query.record().count();fieldPos++)
+            if (query.record().fieldName(fieldPos)!=keyField)
+                childOfDropDownNode->setData(dataIndex++,query.value(fieldPos));
+
+    }while(query.next());
 }
 
 /*
@@ -276,6 +298,6 @@ void TreeModel::setupModelData(const QString &textForQuery, TreeItem *parent)
 QVariant TreeModel::getConvertData(const QVariant& data) const{
 
     if (data.type() == QMetaType::QDateTime)
-        return QVariant("Время: "+data.toDateTime().toString("hh:mm"));
+        return QVariant(data.toTime());
     return data;
 }

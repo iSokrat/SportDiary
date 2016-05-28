@@ -39,8 +39,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Загружаем информацию из БД в таблицу запланированных результатов
     // на определенную дату, ключевое поле - date
-    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),
-                                                getKeyFieldForPlannedResult());
+    setInfoFromDBOnDateForNutrTableOfPlannedResults(QDate::currentDate(),
+                                                    getKeyFieldForNutrTableOfPlannedResult());
+    setInfoFromDBOnDateForTrainingTableOfPlannedResult(QDate::currentDate(),
+                                                       getKeyFieldForTraningTableOfPlannedResult());
+
     // Настраиваем все вызовы connect
     setupConnection();
 }
@@ -69,37 +72,64 @@ void MainWindow::updateAutorizedUser(const User& user){
     updateWindow();
 }
 
-void MainWindow::setInfoFromDBOnDateForTableOfPlannedResults(const QDate &date,
+void MainWindow::setInfoFromDBOnDateForNutrTableOfPlannedResults(const QDate &date,
                                                              const QString &keyField){
 
     // Составляем текст для загловка таблицы
-    QStringList headerLabels = std::move(getHeadersForPlannedResult());
+    QStringList headerLabels = std::move(getHeadersForNutrTableOfPlannedResult());
 
     // Проверяем, если модель занята старой информацией, то
     // удаляем ее
-    if (sqlQueryModelForPlannedResult!=nullptr)
-        delete sqlQueryModelForPlannedResult;
+    if (sqlQueryModelForNutrTableOfPlannedResult!=nullptr)
+        delete sqlQueryModelForNutrTableOfPlannedResult;
 
     // Создаем модель
-    sqlQueryModelForPlannedResult = new TreeModel(headerLabels,
-                                                  std::move(MySqlExecutor::getTextQueryForPlannedResult(autorizedUser,date)),
-                                                  keyField,
-                                                  ui->nutrition_TableOfPlannedResults);
+    sqlQueryModelForNutrTableOfPlannedResult = new TreeModel(headerLabels,
+                                                  std::move(MySqlExecutor::getTextQueryForNutrTableOfPlannedResult(autorizedUser,date)),
+                                                  QStringList{keyField},
+                                                  ui->TabsOfSportFields);
 
     // Установить созданную древовидную модель
-    ui->nutrition_TableOfPlannedResults->setModel(sqlQueryModelForPlannedResult);
+    ui->nutrition_TableOfPlannedResults->setModel(sqlQueryModelForNutrTableOfPlannedResult);
 
     // Скрытие заголовка - отключить
     ui->nutrition_TableOfPlannedResults->setHeaderHidden(false);
 
     // Выровнять столбцы по контенту
-    for (auto column = 0; column < sqlQueryModelForPlannedResult->columnCount(); ++column)
+    for (auto column = 0; column < sqlQueryModelForNutrTableOfPlannedResult->columnCount(); ++column)
         ui->nutrition_TableOfPlannedResults->resizeColumnToContents(column);
 
 }
 
-void MainWindow::changeInfoForTableOfPlannedResults(const QDate &date){
-    setInfoFromDBOnDateForTableOfPlannedResults(date,getKeyFieldForPlannedResult());
+void MainWindow::setInfoFromDBOnDateForTrainingTableOfPlannedResult(const QDate &date, const QStringList &keyFields){
+    // Составляем текст для загловка таблицы
+    QStringList headerLabels = std::move(getHeadersForTrainingTableOfTableOfPlannedResult());
+
+    // Проверяем, если модель занята старой информацией, то
+    // удаляем ее
+    if (sqlQueryModelForTrainingTableOfPlannedResult!=nullptr)
+        delete sqlQueryModelForTrainingTableOfPlannedResult;
+
+    // Создаем модель
+    sqlQueryModelForTrainingTableOfPlannedResult = new TreeModel(headerLabels,
+                                                    std::move(MySqlExecutor::getTextQueryForTrainingTableOfPlannedResult(autorizedUser,date)),
+                                                    keyFields,
+                                                    ui->TabsOfSportFields);
+
+    // Установить созданную древовидную модель
+    ui->training_TableOfPlannedResults->setModel(sqlQueryModelForTrainingTableOfPlannedResult);
+
+    // Скрытие заголовка - отключить
+    ui->training_TableOfPlannedResults->setHeaderHidden(false);
+
+    // Выровнять столбцы по контенту
+    for (auto column = 0; column < sqlQueryModelForTrainingTableOfPlannedResult->columnCount(); ++column)
+        ui->training_TableOfPlannedResults->resizeColumnToContents(column);
+}
+
+void MainWindow::changeInfoForTables(const QDate &date){
+    setInfoFromDBOnDateForNutrTableOfPlannedResults(date,getKeyFieldForNutrTableOfPlannedResult());
+    setInfoFromDBOnDateForTrainingTableOfPlannedResult(date,getKeyFieldForTraningTableOfPlannedResult());
 }
 
 /*
@@ -131,12 +161,12 @@ void MainWindow::updateRowForPlannedResultModel(const QModelIndex & index,
     }
 
     // Устанавливаем информацию для каждого столбца из data в
-    // sqlQueryModelForPlannedResult на основе index.row()
+    // sqlQueryModelForNutrTableOfPlannedResult на основе index.row()
     // и index.parent()
-    for (auto column = 0;column< sqlQueryModelForPlannedResult->columnCount();column++){
-        QModelIndex dataCell = std::move( sqlQueryModelForPlannedResult->index(index.row(),
+    for (auto column = 0;column< sqlQueryModelForNutrTableOfPlannedResult->columnCount();column++){
+        QModelIndex dataCell = std::move( sqlQueryModelForNutrTableOfPlannedResult->index(index.row(),
                                                                                column,index.parent()) );
-        sqlQueryModelForPlannedResult->setData(dataCell,data[column],Qt::EditRole);
+        sqlQueryModelForNutrTableOfPlannedResult->setData(dataCell,data[column],Qt::EditRole);
     }
 
 }
@@ -145,8 +175,8 @@ void MainWindow::updateRowForPlannedResultModel(const QModelIndex & index,
 */
 void MainWindow::updateWindow(){
     updateUserInfoPanel(autorizedUser);
-    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),
-                                                getKeyFieldForPlannedResult());
+    setInfoFromDBOnDateForNutrTableOfPlannedResults(QDate::currentDate(),
+                                                getKeyFieldForNutrTableOfPlannedResult());
     ui->Calendar->setSelectedDate(QDate::currentDate());
 }
 
@@ -168,7 +198,7 @@ void MainWindow::setupConnection(){
     connect(ui->Calendar,
             SIGNAL(activated(QDate)),
             this,
-            SLOT(changeInfoForTableOfPlannedResults(QDate)));
+            SLOT(changeInfoForTables(QDate)));
 
     // При клике по строке таблицы открыть окно редактирования
     connect(ui->nutrition_TableOfPlannedResults,
