@@ -19,8 +19,8 @@
      <rect>
       <x>9</x>
       <y>69</y>
-      <width>661</width>
-      <height>501</height>
+      <width>581</width>
+      <height>451</height>
      </rect>
     </property>
     <property name="tabPosition">
@@ -142,6 +142,11 @@
      <attribute name="title">
       <string>Спортивная тренировка</string>
      </attribute>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QTreeView" name="treeView"/>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>

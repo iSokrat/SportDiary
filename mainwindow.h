@@ -34,7 +34,6 @@ private slots:
     void updateRowForPlannedResultModel(const QModelIndex&index,
                            const QList<QVariant>&data) noexcept;
     void on_menuAction_addNewUser_triggered();
-
 private:
     void setupConnection();
 

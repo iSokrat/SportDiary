@@ -12,6 +12,7 @@
 #include <QtSql>
 #include <QSharedPointer>
 #include <QVBoxLayout>
+#include <QPoint>
 #include <QSplitter>
 #include <QMessageBox>
 
@@ -174,8 +175,6 @@ void MainWindow::setupConnection(){
             SIGNAL(doubleClicked(QModelIndex)),
             this,
             SLOT(showWindowForEditTheRecord(QModelIndex)));
-
-    connect(ui->nutrition_TableOfPlannedResults)
 }
 
 /* Открыть окно "Добавить нового пользователя"
