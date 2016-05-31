@@ -23,6 +23,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void showWindowForEditTheRecord(const QModelIndex& index);
+    void showExerciseCatalogWindow();
 private slots:
     void on_menuAction_changeActualUser_triggered();
     void updateAutorizedUser(const User &user);
@@ -31,13 +34,12 @@ private slots:
     void setInfoFromDBOnDateForTrainingTableOfPlannedResult(const QDate &date, const QStringList &keyFields);
     void changeInfoForTables(const QDate& date);
 
-    void showWindowForEditTheRecord(const QModelIndex& index);
     void updateRowForPlannedResultModel(const QModelIndex&index,
-                           const QList<QVariant>&data) noexcept;
+                                        const QList<QVariant>&data) noexcept;
     void on_menuAction_addNewUser_triggered();
 private:
     void setupConnection();
-
+    void setupUi();
     void updateUserInfoPanel(User & user);
     void updateWindow();
 
@@ -48,7 +50,7 @@ private:
     User autorizedUser{};
     UserInfoWidget userInfoPanel{};
     TreeModel* sqlQueryModelForNutrTableOfPlannedResult = nullptr,
-             * sqlQueryModelForTrainingTableOfPlannedResult = nullptr;
+    * sqlQueryModelForTrainingTableOfPlannedResult = nullptr;
 
     //QQueue <QString> deferredSqlExpression;
 };
@@ -78,7 +80,8 @@ inline QStringList getHeadersForNutrTableOfPlannedResult(){
 }
 inline QStringList getHeadersForTrainingTableOfTableOfPlannedResult(){
     QStringList headerLabels;
-    headerLabels << "Количество повторений"
+    headerLabels << "Название упражнения"
+                 << "Количество повторений"
                  << "Используемый вес"
                  << "Время выполнения упражнения";
     return headerLabels;
@@ -90,8 +93,7 @@ inline QString getKeyFieldForNutrTableOfPlannedResult(){
 
 inline QStringList getKeyFieldForTraningTableOfPlannedResult(){
     return QStringList{
-        "date_of_start_training",
-        "id_exercise"
+        "date_of_start_training"
     };
 }
 

@@ -239,7 +239,6 @@ void TreeModel::setupModelData(const QString &textForQuery, TreeItem *parent)
         // такой вложенности, которая соответствует
         // числу ключевых полей
         for (const auto& keyField:keyFields){
-
             // Заполняем раскрывающийся список
             fillDropDown(currentDropDownNode,query,keyField,parent->columnCount());
         }
@@ -259,6 +258,7 @@ void TreeModel::fillDropDown(TreeItem* dropDown,
     // Полученный узел является раскрывающимя списком,
     // устанавливаем для него текст в первом поле
     QVariant data = query.value(keyField);
+    qDebug() <<data;
     dropDown->setData(0,data);
 
     // Создаем внутреннее наполнение списка

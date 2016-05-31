@@ -30,7 +30,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideMiddle</enum>
@@ -149,6 +149,35 @@
      </layout>
     </widget>
    </widget>
+   <widget class="QCalendarWidget" name="Calendar">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>20</y>
+      <width>420</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>420</width>
+      <height>300</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>11</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+      <underline>false</underline>
+      <strikeout>false</strikeout>
+     </font>
+    </property>
+    <property name="verticalHeaderFormat">
+     <enum>QCalendarWidget::NoVerticalHeader</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -179,9 +208,16 @@
     <addaction name="redoAction"/>
     <addaction name="applyChangesAction"/>
    </widget>
+   <widget class="QMenu" name="info">
+    <property name="title">
+     <string>Информация</string>
+    </property>
+    <addaction name="exerciseCatalog"/>
+   </widget>
    <addaction name="menuItem_File"/>
    <addaction name="editing"/>
    <addaction name="user"/>
+   <addaction name="info"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -192,50 +228,9 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockWidget_2">
-   <property name="minimumSize">
-    <size>
-     <width>220</width>
-     <height>41</height>
-    </size>
-   </property>
-   <property name="floating">
-    <bool>false</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::AllDockWidgetAreas</set>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <widget class="QCalendarWidget" name="Calendar">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>391</width>
-       <height>230</height>
-      </rect>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>400</width>
-       <height>230</height>
-      </size>
-     </property>
-     <property name="verticalHeaderFormat">
-      <enum>QCalendarWidget::NoVerticalHeader</enum>
-     </property>
-    </widget>
-   </widget>
-  </widget>
   <action name="menuAction_addNewUser">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Добавить нового пользователя...</string>
@@ -254,7 +249,7 @@
   </action>
   <action name="undoAction">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="src.qrc">
@@ -269,7 +264,7 @@
   </action>
   <action name="redoAction">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="src.qrc">
@@ -284,10 +279,15 @@
   </action>
   <action name="applyChangesAction">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Выгрузка в БД...</string>
+   </property>
+  </action>
+  <action name="exerciseCatalog">
+   <property name="text">
+    <string>Каталог упражнений</string>
    </property>
   </action>
  </widget>
