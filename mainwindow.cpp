@@ -8,10 +8,12 @@
 #include "addnewuserwidget.h"
 #include "mysqlexecutor.h"
 #include "filemanager.h"
+#include "exercisecatalogwindow.h"
 /*-------------------------------------------------------*/
 #include <QtSql>
 #include <QSharedPointer>
 #include <QVBoxLayout>
+#include <QPoint>
 #include <QSplitter>
 #include <QMessageBox>
 
@@ -20,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow){
 
     ui->setupUi(this);
+    setWindowTitle(tr("Дневник спортивных тренировок"));
 
     // Инициализируем авторизированного
     // пользователя по id из Db
@@ -28,18 +31,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateUserInfoPanel(autorizedUser);
 
-    // Создаем компоновщик для userInfoWidget и ui->TabsOfSportFields
-    QVBoxLayout* centralLayout = new QVBoxLayout;
-    centralLayout->addWidget(&userInfoPanel);
-    centralLayout->addWidget(ui->TabsOfSportFields);
-
-    // Устанавливаем компоновщик для центрального виджета нашего окна
-    ui->centralWidget->setLayout(centralLayout);
+    setupUi();
 
     // Загружаем информацию из БД в таблицу запланированных результатов
     // на определенную дату, ключевое поле - date
-    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),
-                                                getKeyFieldForPlannedResult());
+    setInfoFromDBOnDateForNutrTableOfPlannedResults(QDate::currentDate(),
+                                                    getKeyFieldForNutrTableOfPlannedResult());
+    setInfoFromDBOnDateForTrainingTableOfPlannedResult(QDate::currentDate(),
+                                                       getKeyFieldForTraningTableOfPlannedResult());
+
     // Настраиваем все вызовы connect
     setupConnection();
 }
@@ -51,12 +51,12 @@ MainWindow::~MainWindow(){
 void MainWindow::on_menuAction_changeActualUser_triggered()
 {
 
-   QSharedPointer <UserSelectionDialogWindow> userSelectionWindow(UserSelectionDialogWindow::createUserSelectionDialogWindow(this));
-   connect(userSelectionWindow.data(),
-           SIGNAL(userChanged(User)),
-           this,
-           SLOT(updateAutorizedUser(User)));
-   userSelectionWindow.data()->exec();
+    QSharedPointer <UserSelectionDialogWindow> userSelectionWindow(UserSelectionDialogWindow::createUserSelectionDialogWindow(this));
+    connect(userSelectionWindow.data(),
+            SIGNAL(userChanged(User)),
+            this,
+            SLOT(updateAutorizedUser(User)));
+    userSelectionWindow.data()->exec();
 }
 
 /* Метод обновляет информацию об авторизованном пользователе
@@ -68,37 +68,64 @@ void MainWindow::updateAutorizedUser(const User& user){
     updateWindow();
 }
 
-void MainWindow::setInfoFromDBOnDateForTableOfPlannedResults(const QDate &date,
-                                                             const QString &keyField){
+void MainWindow::setInfoFromDBOnDateForNutrTableOfPlannedResults(const QDate &date,
+                                                                 const QString &keyField){
 
     // Составляем текст для загловка таблицы
-    QStringList headerLabels = std::move(getHeadersForPlannedResult());
+    QStringList headerLabels = std::move(getHeadersForNutrTableOfPlannedResult());
 
     // Проверяем, если модель занята старой информацией, то
     // удаляем ее
-    if (sqlQueryModelForPlannedResult!=nullptr)
-        delete sqlQueryModelForPlannedResult;
+    if (sqlQueryModelForNutrTableOfPlannedResult!=nullptr)
+        delete sqlQueryModelForNutrTableOfPlannedResult;
 
     // Создаем модель
-    sqlQueryModelForPlannedResult = new TreeModel(headerLabels,
-                                                  std::move(MySqlExecutor::getTextQueryForPlannedResult(autorizedUser,date)),
-                                                  keyField,
-                                                  ui->nutrition_TableOfPlannedResults);
+    sqlQueryModelForNutrTableOfPlannedResult = new TreeModel(headerLabels,
+                                                             std::move(MySqlExecutor::getTextQueryForNutrTableOfPlannedResult(autorizedUser,date)),
+                                                             QStringList{keyField},
+                                                             ui->TabsOfSportFields);
 
     // Установить созданную древовидную модель
-    ui->nutrition_TableOfPlannedResults->setModel(sqlQueryModelForPlannedResult);
+    ui->nutrition_TableOfPlannedResults->setModel(sqlQueryModelForNutrTableOfPlannedResult);
 
     // Скрытие заголовка - отключить
     ui->nutrition_TableOfPlannedResults->setHeaderHidden(false);
 
     // Выровнять столбцы по контенту
-    for (auto column = 0; column < sqlQueryModelForPlannedResult->columnCount(); ++column)
+    for (auto column = 0; column < sqlQueryModelForNutrTableOfPlannedResult->columnCount(); ++column)
         ui->nutrition_TableOfPlannedResults->resizeColumnToContents(column);
 
 }
 
-void MainWindow::changeInfoForTableOfPlannedResults(const QDate &date){
-    setInfoFromDBOnDateForTableOfPlannedResults(date,getKeyFieldForPlannedResult());
+void MainWindow::setInfoFromDBOnDateForTrainingTableOfPlannedResult(const QDate &date, const QStringList &keyFields){
+    // Составляем текст для загловка таблицы
+    QStringList headerLabels = std::move(getHeadersForTrainingTableOfTableOfPlannedResult());
+
+    // Проверяем, если модель занята старой информацией, то
+    // удаляем ее
+    if (sqlQueryModelForTrainingTableOfPlannedResult!=nullptr)
+        delete sqlQueryModelForTrainingTableOfPlannedResult;
+
+    // Создаем модель
+    sqlQueryModelForTrainingTableOfPlannedResult = new TreeModel(headerLabels,
+                                                                 std::move(MySqlExecutor::getTextQueryForTrainingTableOfPlannedResult(autorizedUser,date)),
+                                                                 keyFields,
+                                                                 ui->TabsOfSportFields);
+
+    // Установить созданную древовидную модель
+    ui->training_TableOfPlannedResults->setModel(sqlQueryModelForTrainingTableOfPlannedResult);
+
+    // Скрытие заголовка - отключить
+    ui->training_TableOfPlannedResults->setHeaderHidden(false);
+
+    // Выровнять столбцы по контенту
+    for (auto column = 0; column < sqlQueryModelForTrainingTableOfPlannedResult->columnCount(); ++column)
+        ui->training_TableOfPlannedResults->resizeColumnToContents(column);
+}
+
+void MainWindow::changeInfoForTables(const QDate &date){
+    setInfoFromDBOnDateForNutrTableOfPlannedResults(date,getKeyFieldForNutrTableOfPlannedResult());
+    setInfoFromDBOnDateForTrainingTableOfPlannedResult(date,getKeyFieldForTraningTableOfPlannedResult());
 }
 
 /*
@@ -117,6 +144,11 @@ void MainWindow::showWindowForEditTheRecord(const QModelIndex &index){
 
 }
 
+void MainWindow::showExerciseCatalogWindow(){
+    ExerciseCatalogWindow* window = new ExerciseCatalogWindow(this);
+    window->show();
+}
+
 /* Обновление информации на основании data. Index
  * должен хранить строку модели, которую необходимо
  * обновить
@@ -130,12 +162,13 @@ void MainWindow::updateRowForPlannedResultModel(const QModelIndex & index,
     }
 
     // Устанавливаем информацию для каждого столбца из data в
-    // sqlQueryModelForPlannedResult на основе index.row()
+    // sqlQueryModelForNutrTableOfPlannedResult на основе index.row()
     // и index.parent()
-    for (auto column = 0;column< sqlQueryModelForPlannedResult->columnCount();column++){
-        QModelIndex dataCell = std::move( sqlQueryModelForPlannedResult->index(index.row(),
-                                                                               column,index.parent()) );
-        sqlQueryModelForPlannedResult->setData(dataCell,data[column],Qt::EditRole);
+    for (auto column = 0;column< sqlQueryModelForNutrTableOfPlannedResult->columnCount();column++){
+        QModelIndex dataCell = std::move( sqlQueryModelForNutrTableOfPlannedResult->index(index.row(),
+                                                                                          column,
+                                                                                          index.parent()) );
+        sqlQueryModelForNutrTableOfPlannedResult->setData(dataCell,data[column],Qt::EditRole);
     }
 
 }
@@ -144,8 +177,10 @@ void MainWindow::updateRowForPlannedResultModel(const QModelIndex & index,
 */
 void MainWindow::updateWindow(){
     updateUserInfoPanel(autorizedUser);
-    setInfoFromDBOnDateForTableOfPlannedResults(QDate::currentDate(),
-                                                getKeyFieldForPlannedResult());
+    setInfoFromDBOnDateForNutrTableOfPlannedResults(QDate::currentDate(),
+                                                    getKeyFieldForNutrTableOfPlannedResult());
+    setInfoFromDBOnDateForTrainingTableOfPlannedResult(QDate::currentDate(),
+                                                       getKeyFieldForTraningTableOfPlannedResult());
     ui->Calendar->setSelectedDate(QDate::currentDate());
 }
 
@@ -164,18 +199,36 @@ void MainWindow::updateUserInfoPanel(User &user)
 /* Настройка connect связей
 */
 void MainWindow::setupConnection(){
+    connect(ui->exerciseCatalog,
+            SIGNAL(triggered()),
+            this,
+            SLOT(showExerciseCatalogWindow()));
     connect(ui->Calendar,
             SIGNAL(activated(QDate)),
             this,
-            SLOT(changeInfoForTableOfPlannedResults(QDate)));
+            SLOT(changeInfoForTables(QDate)));
 
     // При клике по строке таблицы открыть окно редактирования
     connect(ui->nutrition_TableOfPlannedResults,
             SIGNAL(doubleClicked(QModelIndex)),
             this,
             SLOT(showWindowForEditTheRecord(QModelIndex)));
+}
 
-    connect(ui->nutrition_TableOfPlannedResults)
+// Настройка графического интерфейса окна
+void MainWindow::setupUi(){
+
+    QHBoxLayout* userPanelAndCalendarLayout = new QHBoxLayout;
+    userPanelAndCalendarLayout->addWidget(&userInfoPanel);
+    userPanelAndCalendarLayout->addWidget(ui->Calendar);
+
+    // Создаем компоновщик для userInfoWidget и ui->TabsOfSportFields
+    QVBoxLayout* centralLayout = new QVBoxLayout;
+    centralLayout->addLayout(userPanelAndCalendarLayout);
+    centralLayout->addWidget(ui->TabsOfSportFields);
+
+    // Устанавливаем компоновщик для центрального виджета нашего окна
+    ui->centralWidget->setLayout(centralLayout);
 }
 
 /* Открыть окно "Добавить нового пользователя"

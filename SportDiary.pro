@@ -28,7 +28,9 @@ SOURCES += main.cpp\
     imagemodel.cpp \
     mysqlexecutor.cpp \
     filemanager.cpp \
-    pathsoffiles.cpp
+    pathsoffiles.cpp \
+    exercisecatalogwindow.cpp \
+    exerciseinfowindow.cpp
 
 HEADERS  += mainwindow.h \
     userselectiondialogwindow.h \
@@ -42,11 +44,15 @@ HEADERS  += mainwindow.h \
     imagemodel.h \
     mysqlexecutor.h \
     filemanager.h \
-    pathsoffiles.h
+    pathsoffiles.h \
+    exercisecatalogwindow.h \
+    exerciseinfowindow.h
 
 FORMS    += mainwindow.ui \
     userselectiondialogwindow.ui \
-    addnewuserwidget.ui
+    addnewuserwidget.ui \
+    exercisecatalogwindow.ui \
+    exerciseinfowindow.ui
 
 RESOURCES += \
     src.qrc

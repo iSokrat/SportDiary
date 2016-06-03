@@ -23,32 +23,34 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void showWindowForEditTheRecord(const QModelIndex& index);
+    void showExerciseCatalogWindow();
 private slots:
     void on_menuAction_changeActualUser_triggered();
     void updateAutorizedUser(const User &user);
 
-    void setInfoFromDBOnDateForTableOfPlannedResults(const QDate &date, const QString &keyField);
-    void changeInfoForTableOfPlannedResults(const QDate& date);
+    void setInfoFromDBOnDateForNutrTableOfPlannedResults(const QDate &date, const QString &keyField);
+    void setInfoFromDBOnDateForTrainingTableOfPlannedResult(const QDate &date, const QStringList &keyFields);
+    void changeInfoForTables(const QDate& date);
 
-    void showWindowForEditTheRecord(const QModelIndex& index);
     void updateRowForPlannedResultModel(const QModelIndex&index,
-                           const QList<QVariant>&data) noexcept;
+                                        const QList<QVariant>&data) noexcept;
     void on_menuAction_addNewUser_triggered();
-
 private:
     void setupConnection();
-
+    void setupUi();
     void updateUserInfoPanel(User & user);
     void updateWindow();
 
     QStringList getFieldForTextQueryForPlannedResult() const;
-    QStringList getHeadersForPlannedResult();
 
 private:
     Ui::MainWindow *ui;
     User autorizedUser{};
     UserInfoWidget userInfoPanel{};
-    TreeModel* sqlQueryModelForPlannedResult = nullptr;
+    TreeModel* sqlQueryModelForNutrTableOfPlannedResult = nullptr,
+    * sqlQueryModelForTrainingTableOfPlannedResult = nullptr;
 
     //QQueue <QString> deferredSqlExpression;
 };
@@ -66,8 +68,7 @@ inline QStringList MainWindow::getFieldForTextQueryForPlannedResult() const{
     };
 }
 
-
-inline QStringList MainWindow::getHeadersForPlannedResult(){
+inline QStringList getHeadersForNutrTableOfPlannedResult(){
     QStringList headerLabels;
     headerLabels << "Название продукта"
                  << "Белки, граммы"
@@ -77,9 +78,23 @@ inline QStringList MainWindow::getHeadersForPlannedResult(){
                  << "id_eating";
     return headerLabels;
 }
+inline QStringList getHeadersForTrainingTableOfTableOfPlannedResult(){
+    QStringList headerLabels;
+    headerLabels << "Название упражнения"
+                 << "Количество повторений"
+                 << "Используемый вес"
+                 << "Время выполнения упражнения";
+    return headerLabels;
+}
 
-inline QString getKeyFieldForPlannedResult(){
+inline QString getKeyFieldForNutrTableOfPlannedResult(){
     return "date";
+}
+
+inline QStringList getKeyFieldForTraningTableOfPlannedResult(){
+    return QStringList{
+        "date_of_start_training"
+    };
 }
 
 #endif // MAINWINDOW_H

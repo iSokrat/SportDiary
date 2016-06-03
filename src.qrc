@@ -3,9 +3,44 @@
         <file>defaultAvatar.jpg</file>
         <file>uploads/images/vadim.jpg</file>
         <file>uploads/images/yarik.jpg</file>
+        <file>src/defaultImageForContent.jpeg</file>
     </qresource>
     <qresource prefix="/images/for_menu_bar" lang="Russian">
         <file>src/images/undoActionIcon.ico</file>
         <file>src/images/redoActionIcon.ico</file>
+    </qresource>
+    <qresource prefix="/images/exercises/legs" lang="Russian">
+        <file>src/images/rasgibanija_nog_v_trenashere.jpeg</file>
+        <file>src/images/sgibani nog.jpg</file>
+        <file>src/images/shim_nogami.jpg</file>
+        <file>src/images/vypady_vperyod_so_shtangoi_na_plechah.jpg</file>
+        <file>src/images/Prised_stanga_na_plechah.jpg</file>
+        <file>src/images/rumyinskaya-stanovaya-tyaga-tehnika-vyipolneniya-1.jpg</file>
+    </qresource>
+    <qresource prefix="/images/exercises/chest">
+        <file>src/images/crossover.jpg</file>
+    </qresource>
+    <qresource prefix="/images/exercises/biceps" lang="Russian">
+        <file>src/images/podjem_shtangi_na_biceps_na_scott.jpg</file>
+        <file>src/images/posjem_gantelej_stoja.png</file>
+        <file>src/images/podjem_shtangi_na_biceps.jpg</file>
+    </qresource>
+    <qresource prefix="/images/exercises/triceps" lang="Russian">
+        <file>src/images/france_shim_ganteli_sidya.jpg</file>
+        <file>src/images/france_shim_lesha.jpg</file>
+        <file>src/images/rasgibanija_na_triceps_na_verhnem_bloke.jpeg</file>
+    </qresource>
+    <qresource prefix="/images/exercises/back" lang="Russian">
+        <file>src/images/tyaga_ganteli_v_naklone_k_poyasu.jpg</file>
+        <file>src/images/tyaga-v-naklone-yeffekt2.jpg</file>
+        <file>src/images/stanovaja_tyaga_klassika.jpg</file>
+        <file>src/images/tyaga_verh_bloka_shir_hvat.jpeg</file>
+    </qresource>
+    <qresource prefix="/images/exercises/abdominal" lang="Russian">
+        <file>src/images/podem_koleni_vise.jpg</file>
+        <file>src/images/4_press.jpg</file>
+    </qresource>
+    <qresource prefix="/images/exercises/forearm" lang="Russian">
+        <file>src/images/razgibanie-zapyastij.jpg</file>
     </qresource>
 </RCC>

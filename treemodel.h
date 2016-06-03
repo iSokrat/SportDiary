@@ -14,7 +14,7 @@ class TreeModel: public QAbstractItemModel
     Q_OBJECT
 
 public:
-    TreeModel(const QStringList &headers, const QString &textForQuery, const QString &nameOfKeyField, QObject *parent = nullptr);
+    TreeModel(const QStringList &headers, const QString &textForQuery, const QStringList &namesOfKeyFields, QObject *parent = nullptr);
     ~TreeModel();
 
     QVariant data(const QModelIndex &index, int role) const override;
@@ -43,27 +43,30 @@ public:
     bool removeRows(int position, int rows,
                     const QModelIndex &parent = QModelIndex()) override;
 
-    QString getKeyField();
+    QStringList getKeyFields();
 
     void setDataFromSqlQuery(const QString& textForQuery);
 private:
     void setupModelData(const QString &textForQuery, TreeItem *parent);
     QVariant getConvertData(const QVariant &data) const;
     TreeItem *getItem(const QModelIndex &index) const;
-    void setKeyField(const QString& name);
-    void setKeyField(QString&& name);
-
+    void setKeyFields(const QStringList &names);
+    void setKeyFields(QStringList&& names);
+    void fillDropDown(TreeItem* dropDown,
+                      QSqlQuery& query,
+                      const QString& keyField,
+                      qint32 columnCount);
     // Корневой Item,в нем хранится информация для заголовка
     TreeItem *rootItem;
 
     // Хранит имя столбца таблицы,
     // значение которого должно служить в качестве раскрывающегося списка
-    QString nameOfKeyField{};
+    QStringList namesOfKeyFields{};
 };
 
 // inline методы
 
-/* Вставляет ключевое поле по имени name, по которому будет
+/* Вставляет ключевые поля по имени names, по которому будет
  * отображаться строка в дереве
  *
  * Пример:
@@ -71,7 +74,7 @@ private:
  *  id_user time_of_day date
  *    1       10.00     10.10.2020
  *    1       20.00     10.10.2020
- * Если key field = time_of_day, то отображаться будет:
+ * Если key field = {time_of_day}, то отображаться будет:
  *
  *  user      |    date
  *  >10.00    |
@@ -79,16 +82,16 @@ private:
  *  >20.00    |
  *      1     |    10.10.2020
 */
-inline void TreeModel::setKeyField(const QString& name){
-    nameOfKeyField = name;
+inline void TreeModel::setKeyFields(const QStringList& names){
+    namesOfKeyFields = names;
 }
 
-inline void TreeModel::setKeyField(QString &&name){
-    nameOfKeyField = std::move(name);
+inline void TreeModel::setKeyFields(QStringList&& names){
+    namesOfKeyFields = std::move(names);
 }
 
-inline QString TreeModel::getKeyField(){
-    return nameOfKeyField;
+inline QStringList TreeModel::getKeyFields(){
+    return namesOfKeyFields;
 }
 
 #endif // TREEMODEL_H

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ExerciseCatalogWindow</class>
+ <widget class="QDialog" name="ExerciseCatalogWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>521</width>
+    <height>386</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="TabsOfExercises">
+     <property name="tabPosition">
+      <enum>QTabWidget::North</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabLegs">
+      <attribute name="title">
+       <string>Ноги</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabBack">
+      <attribute name="title">
+       <string>Спина</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabChest">
+      <attribute name="title">
+       <string>Грудь</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabBiceps">
+      <attribute name="title">
+       <string>Бицепс</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabTriceps">
+      <attribute name="title">
+       <string>Трицепс</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabAbdominal">
+      <attribute name="title">
+       <string>Пресс</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tabForearm">
+      <attribute name="title">
+       <string>Предплечье</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
