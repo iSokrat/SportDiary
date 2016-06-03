@@ -14,6 +14,8 @@ public slots:
 
     MySqlExecutor(QObject* parent = nullptr);
     static bool addNewUserIntoDB(const User& user);
+    static ExerciseInfo getInfoAboutExercise(qint32 idExercise);
+
     static QVector<cortegeType> getInfoOfExercisesForCertainMuscules(const QStringList& muscules);
     static bool initUser(quint32 idUser, User &forUser);
     static QString getTextQueryForNutrTableOfPlannedResult(const User& autorizedUser,const QVariant& date);

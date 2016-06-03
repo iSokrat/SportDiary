@@ -21,6 +21,30 @@ bool MySqlExecutor::addNewUserIntoDB(const User& user){
     return false;
 }
 
+ExerciseInfo MySqlExecutor::getInfoAboutExercise(qint32 idExercise){
+    QSqlQuery query(" SELECT * "
+                    " FROM exercise"
+                    " WHERE id_exercise = "+QString::number(idExercise));
+
+    if (!query.exec()){
+        qDebug() <<query.lastError();
+        return ExerciseInfo{};
+    }
+
+    // Переходим на первую запись
+    // Если ошибка
+    if (!query.next()){
+        qDebug() <<"Записи с id = "+QString::number(idExercise)+" "
+                   "не найдена.";
+        return ExerciseInfo{};
+    }
+
+    ExerciseInfo exercise{ query.value("name").toString(),
+                           query.value("describtion").toString() };
+
+    return std::move(exercise);
+}
+
 /*
  * Возвращает список описания упражнениц, в которых
  * включена работа muscules.
