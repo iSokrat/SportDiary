@@ -1,9 +1,9 @@
 #include "mysqlexecutor.h"
+
+#include "exerciseinfo.h"
 //--------------------------
 #include <QSqlQuery>
 #include <tuple>
-
-MySqlExecutor::MySqlExecutor(QObject *parent){}
 
 bool MySqlExecutor::addNewUserIntoDB(const User& user){
     QStringList insertValues{
@@ -24,7 +24,8 @@ bool MySqlExecutor::addNewUserIntoDB(const User& user){
 ExerciseInfo MySqlExecutor::getInfoAboutExercise(qint32 idExercise){
     QSqlQuery query(" SELECT * "
                     " FROM exercise"
-                    " WHERE id_exercise = "+QString::number(idExercise));
+                    " WHERE id_exercise = "+QString::number(idExercise)+
+                    " LIMIT 1");
 
     if (!query.exec()){
         qDebug() <<query.lastError();
@@ -39,8 +40,8 @@ ExerciseInfo MySqlExecutor::getInfoAboutExercise(qint32 idExercise){
         return ExerciseInfo{};
     }
 
-    ExerciseInfo exercise{ query.value("name").toString(),
-                           query.value("describtion").toString() };
+    ExerciseInfo exercise( query.value("name").toString(),
+                           query.value("describtion").toString());
 
     return std::move(exercise);
 }

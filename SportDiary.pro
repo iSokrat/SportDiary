@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     filemanager.cpp \
     pathsoffiles.cpp \
     exercisecatalogwindow.cpp \
-    exerciseinfowindow.cpp
+    exerciseinfowindow.cpp \
+    exerciseinfo.cpp
 
 HEADERS  += mainwindow.h \
     userselectiondialogwindow.h \
@@ -46,7 +47,8 @@ HEADERS  += mainwindow.h \
     filemanager.h \
     pathsoffiles.h \
     exercisecatalogwindow.h \
-    exerciseinfowindow.h
+    exerciseinfowindow.h \
+    exerciseinfo.h
 
 FORMS    += mainwindow.ui \
     userselectiondialogwindow.ui \

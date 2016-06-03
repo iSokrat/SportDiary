@@ -23,12 +23,13 @@ ExerciseCatalogWindow::~ExerciseCatalogWindow(){
 
 void ExerciseCatalogWindow::openInfoWindowForExercise(QListWidgetItem *item){
 
-    // Сделать перемещающий конструктор
+    // Получаем упражнение из БД
     ExerciseInfo exercise{ MySqlExecutor::getInfoAboutExercise(item->data(Qt::UserRole).toUInt()) };
-    auto window = new ExerciseInfoWindow(this);
+
+    // Создаем окно информации об упражнении
+    auto window = new ExerciseInfoWindow(exercise,this);
 
     window->show();
-
 }
 
 /*

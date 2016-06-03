@@ -2,6 +2,7 @@
 #define MYSQLEXECUTOR_H
 
 #include "user.h"
+class ExerciseInfo;
 //---------------------
 #include <QDebug>
 #include <QtSql>
